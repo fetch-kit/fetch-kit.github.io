@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title | default('fetch-kit') }}</title>
   <meta name="description" content="{{ description | default('Making fetch more powerful in production and more testable in development.') }}" />
+  <link rel="canonical" href="https://fetch-kit.github.io{{ page.url }}" />
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="fetch-kit" />
+  <meta property="og:title" content="{{ title | default('fetch-kit') }}" />
+  <meta property="og:description" content="{{ description | default('Making fetch more powerful in production and more testable in development.') }}" />
+  <meta property="og:url" content="https://fetch-kit.github.io{{ page.url }}" />
+  <meta property="og:image" content="https://fetch-kit.github.io/assets/images/logo.png" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="{{ title | default('fetch-kit') }}" />
+  <meta name="twitter:description" content="{{ description | default('Making fetch more powerful in production and more testable in development.') }}" />
+  <meta name="twitter:image" content="https://fetch-kit.github.io/assets/images/logo.png" />
   <link rel="icon" href="/assets/images/favicon.ico" />
   <link rel="stylesheet" href="/assets/css/styles.css" />
   {% block head %}{% endblock %}
