@@ -46,6 +46,8 @@ export default function (eleventyConfig) {
     fs.writeFileSync(tailwindOutputPath, result.css);
   });
 
+  eleventyConfig.addPassthroughCopy('src/CNAME');
+
   return {
     dir: {
       input: 'src',
