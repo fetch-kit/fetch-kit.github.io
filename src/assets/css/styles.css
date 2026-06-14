@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0b2240;
+  --color-panel: #0f2c52;
+  --color-line: #27456f;
+  --color-soft: #9db8db;
+  --color-brand: #26c7b5;
+  --color-brand-strong: #4be2d2;
+}
+
+body {
+  background: radial-gradient(1000px 520px at 10% -8%, rgba(38, 199, 181, 0.2), transparent 52%),
+              radial-gradient(950px 460px at 96% -4%, rgba(59, 130, 246, 0.22), transparent 48%),
+              linear-gradient(180deg, #0d284b 0%, #0b2240 100%),
+              var(--color-bg);
+}
+
+.logo-wrap {
+  border-color: rgba(77, 226, 210, 0.45);
+  background: rgba(11, 34, 64, 0.95);
+  box-shadow: 0 0 0 1px rgba(13, 40, 75, 0.8), 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.badges img {
+  height: 20px;
+  width: auto;
+  border-radius: 999px;
+}
+
+::selection {
+  background: rgba(75, 226, 210, 0.36);
+  color: #f8fafc;
+}

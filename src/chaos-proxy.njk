@@ -1,0 +1,202 @@
+---
+layout: layouts/base.njk
+title: chaos-proxy | fetch-kit
+description: Transport-level chaos proxy in Node.js and Go.
+permalink: /chaos-proxy/
+---
+<section>
+  <p class="mb-3 inline-flex items-center rounded-full border border-teal-400/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">chaos-proxy + chaos-proxy-go</p>
+  <h1 class="text-4xl font-semibold text-slate-50">The same chaos model in two runtimes</h1>
+  <p class="mt-4 max-w-3xl text-slate-300">chaos-proxy is a transport-level HTTP chaos proxy for injecting latency, failures, drops, throttling, and transforms. Both Node.js and Go versions share the same operational model: YAML config, ordered middleware chains, route matching, and runtime reload.</p>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">What it does</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">chaos-proxy runs as a standalone proxy process. You point your HTTP client at it instead of the real upstream, and it applies the chaos rules from a YAML config file before forwarding requests. Because it operates at the transport layer, it works for any HTTP client in any language - your app code does not need to change at all.</p>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Language-agnostic</p>
+      <p class="mt-1 text-xs text-slate-400">Any HTTP client - browser, Node.js, Go, Python, curl - can be routed through the proxy without code changes.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Hot-reload config</p>
+      <p class="mt-1 text-xs text-slate-400">Send <code>POST /reload</code> to apply a new YAML config at runtime. No restart needed, chaos rules change instantly.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Ready-made presets</p>
+      <p class="mt-1 text-xs text-slate-400">Ship with presets for common scenarios: mobile-3g, flaky-backend, burst-errors, timeout-storm. Start in seconds.</p>
+    </div>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">Examples</h2>
+
+  <h3 class="mt-6 text-base font-semibold text-slate-100">Minimal config</h3>
+  <p class="mt-1 text-sm text-slate-400"><code>target</code> is the upstream service chaos-proxy forwards to. <code>port</code> is where chaos-proxy itself listens - point your app or tests here instead of the real service.</p>
+  <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code>target: "http://localhost:4000"  # upstream to forward requests to
+port: 5000                       # chaos-proxy listens here
+global:
+  - latency: 100                 # add 100ms to every request</code></pre>
+
+  <h3 class="mt-8 text-base font-semibold text-slate-100">Route-specific chaos</h3>
+  <p class="mt-1 text-sm text-slate-400">Global rules apply to all traffic. Route rules layer on top, matched by HTTP method and path pattern.</p>
+  <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code>target: "http://localhost:4000"
+port: 5000
+global:
+  - failRandomly:
+      rate: 0.05               # 5% of all requests return 503
+      status: 503
+routes:
+  "GET /users/:id":
+    - failNth:
+        n: 3                   # every 3rd request to this route returns 500
+        status: 500
+  "POST /orders":
+    - latencyRange:
+        minMs: 500             # simulate variable upstream slowness
+        maxMs: 2000</code></pre>
+
+  <h3 class="mt-8 text-base font-semibold text-slate-100">Using a preset</h3>
+  <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code># start with a ready-made mobile-3g simulation
+npx chaos-proxy --config presets/mobile-3g.yaml --verbose</code></pre>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">How to use it</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Run chaos-proxy alongside your app or test suite. Point your HTTP client at the proxy port instead of the real service. Because nothing in your app code changes, you can toggle chaos on and off just by changing which port you target, or by swapping configs at runtime.</p>
+  <div class="mt-5 grid gap-4 sm:grid-cols-2">
+    <div>
+      <h3 class="text-sm font-semibold text-slate-100">1. Start the proxy</h3>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>npx chaos-proxy --config chaos.yaml --verbose</code></pre>
+    </div>
+    <div>
+      <h3 class="text-sm font-semibold text-slate-100">2. Point your client at it</h3>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code># was: http://localhost:4000
+# now: http://localhost:5000
+fetch('http://localhost:5000/users/123')</code></pre>
+    </div>
+    <div>
+      <h3 class="text-sm font-semibold text-slate-100">3. Reload config without restarting</h3>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>curl -X POST http://localhost:5000/reload</code></pre>
+    </div>
+    <div>
+      <h3 class="text-sm font-semibold text-slate-100">4. Use programmatically in tests</h3>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>import { loadConfig, startServer } from 'chaos-proxy'
+
+const server = await startServer(loadConfig('chaos.yaml'))
+// run your tests against http://localhost:5000
+await server.close()</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">Node.js vs Go - which one to use?</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Both versions share the same YAML config format and middleware model, so you can switch between them without changing your config files. The difference is runtime characteristics and how you install them.</p>
+  <div class="mt-5 overflow-x-auto">
+    <table class="w-full text-sm text-left">
+      <thead>
+        <tr class="border-b border-slate-700">
+          <th class="pb-2 pr-6 font-semibold text-slate-300"></th>
+          <th class="pb-2 pr-6 font-semibold text-teal-300">chaos-proxy (Node.js)</th>
+          <th class="pb-2 font-semibold text-teal-300">chaos-proxy-go</th>
+        </tr>
+      </thead>
+      <tbody class="text-slate-400">
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Throughput</td>
+          <td class="py-2 pr-6">Good</td>
+          <td class="py-2">~2x higher - lower latency under load</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Memory footprint</td>
+          <td class="py-2 pr-6">Higher (Node.js runtime)</td>
+          <td class="py-2">Minimal - single binary, no runtime</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Install</td>
+          <td class="py-2 pr-6"><code>npm install chaos-proxy</code></td>
+          <td class="py-2"><code>go build</code> or download binary</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Programmatic API</td>
+          <td class="py-2 pr-6">Yes - TypeScript</td>
+          <td class="py-2">Yes - Go</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Best for</td>
+          <td class="py-2 pr-6">JS/Node projects, quick start</td>
+          <td class="py-2">High-load testing, polyglot teams, CI containers</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-6">Config format</td>
+          <td class="py-2 pr-6">Identical YAML</td>
+          <td class="py-2">Identical YAML</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-4 text-sm text-slate-400">If you are already in a Node.js project, start with chaos-proxy. If you are running high-concurrency scenarios, running in a Docker container without Node.js, or testing a Go service, use chaos-proxy-go.</p>
+</section>
+
+<section class="mt-8 grid gap-4 lg:grid-cols-2">
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+    <h2 class="text-xl font-semibold">Node.js / TypeScript</h2>
+    <p class="mt-2 text-sm text-slate-400">Package: <code>chaos-proxy</code></p>
+    <div class="mt-3 badges">
+      <img src="https://img.shields.io/npm/v/chaos-proxy" alt="chaos-proxy npm version" />
+      <img src="https://img.shields.io/npm/dm/chaos-proxy" alt="chaos-proxy npm downloads" />
+      <img src="https://img.shields.io/github/stars/fetch-kit/chaos-proxy?style=social" alt="chaos-proxy github stars" />
+    </div>
+    <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>npm install chaos-proxy
+npx chaos-proxy --config chaos.yaml --verbose</code></pre>
+    <div class="mt-4 flex flex-wrap gap-3 text-sm">
+      <a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/chaos-proxy" target="_blank" rel="noreferrer">GitHub</a>
+      <a class="text-teal-300 hover:underline" href="https://www.npmjs.com/package/chaos-proxy" target="_blank" rel="noreferrer">npm</a>
+      <a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/chaos-proxy/tree/main/docs" target="_blank" rel="noreferrer">Docs</a>
+    </div>
+  </article>
+
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+    <h2 class="text-xl font-semibold">Go</h2>
+    <p class="mt-2 text-sm text-slate-400">Binary + Go API</p>
+    <div class="mt-3 badges">
+      <img src="https://img.shields.io/github/stars/fetch-kit/chaos-proxy-go?style=social" alt="chaos-proxy-go github stars" />
+    </div>
+    <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>go build -o chaos-proxy-go .
+./chaos-proxy-go --config chaos.yaml --verbose</code></pre>
+    <div class="mt-4 flex flex-wrap gap-3 text-sm">
+      <a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/chaos-proxy-go" target="_blank" rel="noreferrer">GitHub</a>
+      <a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/chaos-proxy-go/tree/main/docs" target="_blank" rel="noreferrer">Docs</a>
+      <a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/chaos-proxy-go/tree/main/presets" target="_blank" rel="noreferrer">Presets</a>
+    </div>
+  </article>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">Shared capabilities</h2>
+  <div class="mt-4 grid gap-4 md:grid-cols-2">
+    <ul class="space-y-2 text-sm text-slate-300">
+      <li>YAML-driven configuration</li>
+      <li>Global and route-level middleware chains</li>
+      <li>Runtime config reload with <code>POST /reload</code></li>
+      <li>Method + path matching</li>
+    </ul>
+    <ul class="space-y-2 text-sm text-slate-300">
+      <li>Latency and latencyRange</li>
+      <li>fail / failRandomly / failNth / drops</li>
+      <li>rate limiting and throttling</li>
+      <li>Header/body transforms and optional observability</li>
+    </ul>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-xl font-semibold">From the blog</h2>
+  <ul class="mt-4 space-y-2 text-sm text-slate-300">
+    <li><a class="text-teal-300 hover:underline" href="https://blog.gaborkoos.com/posts/2025-09-21-Breaking-Your-Own-App-on-Purpose-with-Chaos-Proxy" target="_blank" rel="noreferrer">Breaking your own app (on purpose) with chaos-proxy</a></li>
+    <li><a class="text-teal-300 hover:underline" href="https://blog.gaborkoos.com/posts/2025-10-11-Nodejs-vs-Go-in_Practice-Performance-Comparison-of-chaos-proxy-And-chaos-proxy-go" target="_blank" rel="noreferrer">Node.js vs Go performance comparison</a></li>
+    <li><a class="text-teal-300 hover:underline" href="https://blog.gaborkoos.com/posts/2026-03-19-Developing-and-Benchmarking-the-Same-Feature-in-Node-and-Go/" target="_blank" rel="noreferrer">Developing and benchmarking the same feature in Node and Go</a></li>
+  </ul>
+</section>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title | default('fetch-kit') }}</title>
+  <meta name="description" content="{{ description | default('Making fetch more powerful in production and more testable in development.') }}" />
+  <link rel="icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  {% block head %}{% endblock %}
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+  <header class="sticky top-0 z-20 border-b border-[color:var(--color-line)] bg-[color:var(--color-bg)]/90 backdrop-blur">
+    <nav class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
+      <a href="/" class="flex items-center gap-3 text-sm font-semibold tracking-wide text-slate-100">
+        <span class="logo-wrap inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-md border">
+          <img src="/assets/images/logo.png" alt="fetch-kit logo" class="h-8 w-8 object-contain" />
+        </span>
+        <span class="text-base">fetch-kit</span>
+      </a>
+
+      <button id="mobile-menu-toggle" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-[color:var(--color-line)] text-slate-200 md:hidden" aria-label="Toggle menu" aria-expanded="false" aria-controls="main-menu">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+      <div id="main-menu" class="fixed left-0 right-0 top-16 z-10 hidden flex flex-col gap-2 border-b border-[color:var(--color-line)] bg-[color:var(--color-bg)]/98 px-6 py-4 text-sm md:static md:flex md:w-auto md:flex-row md:items-center md:gap-5 md:border-0 md:bg-transparent md:px-0 md:py-0">
+        <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/">home</a>
+        <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/ffetch/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/ffetch/">ffetch</a>
+        <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/chaos-fetch/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/chaos-fetch/">chaos-fetch</a>
+        <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/chaos-proxy/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/chaos-proxy/">chaos-proxy</a>
+        <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/chaos-arena/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/chaos-arena/">chaos arena</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto w-full max-w-6xl px-6 py-12">
+    {% block content %}{{ content | safe }}{% endblock %}
+  </main>
+
+  <footer class="border-t border-[color:var(--color-line)] py-10">
+    <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 text-sm text-slate-400">
+      <p>fetch-kit</p>
+      <a href="https://github.com/fetch-kit" class="hover:text-slate-200">GitHub</a>
+    </div>
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById('mobile-menu-toggle');
+    const mainMenu = document.getElementById('main-menu');
+    if (menuBtn && mainMenu) {
+      menuBtn.addEventListener('click', () => {
+        const isOpen = !mainMenu.classList.contains('hidden');
+        mainMenu.classList.toggle('hidden');
+        menuBtn.setAttribute('aria-expanded', String(!isOpen));
+      });
+
+      document.addEventListener('click', (e) => {
+        const isClickInside = mainMenu.contains(e.target) || menuBtn.contains(e.target);
+        if (!isClickInside && !mainMenu.classList.contains('hidden')) {
+          mainMenu.classList.add('hidden');
+          menuBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

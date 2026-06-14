@@ -1,0 +1,169 @@
+---
+layout: layouts/base.njk
+title: chaos-fetch | fetch-kit
+description: Inject deterministic fetch-level chaos for resilience testing.
+permalink: /chaos-fetch/
+---
+<section class="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+  <div>
+    <p class="mb-3 inline-flex items-center rounded-full border border-teal-400/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">@fetchkit/chaos-fetch</p>
+    <h1 class="text-4xl font-semibold text-slate-50">Inject network chaos directly into fetch</h1>
+    <p class="mt-4 max-w-3xl text-slate-300">chaos-fetch is a composable middleware client for fault injection at fetch call sites. You can model latency, random failures, failNth patterns, rate limits, throttling, and mocks with route-level control.</p>
+    <div class="mt-4 badges">
+      <img src="https://img.shields.io/npm/v/@fetchkit/chaos-fetch" alt="chaos-fetch npm version" />
+      <img src="https://img.shields.io/npm/dm/@fetchkit/chaos-fetch" alt="chaos-fetch npm downloads" />
+      <img src="https://img.shields.io/github/stars/fetch-kit/chaos-fetch?style=social" alt="chaos-fetch github stars" />
+    </div>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a href="https://github.com/fetch-kit/chaos-fetch" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm hover:border-slate-500">GitHub</a>
+      <a href="https://www.npmjs.com/package/@fetchkit/chaos-fetch" target="_blank" rel="noreferrer" class="rounded-md border border-teal-500/50 bg-teal-500/10 px-4 py-2 text-sm text-teal-200">npm package</a>
+    </div>
+  </div>
+
+  <aside class="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+    <h2 class="text-lg font-semibold">Install</h2>
+    <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>npm install @fetchkit/chaos-fetch</code></pre>
+    <p class="mt-4 text-sm text-slate-300">Best fit when you want to test client resilience in browser/test runtime without introducing an external proxy layer.</p>
+  </aside>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">What it does</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">chaos-fetch wraps fetch with a composable middleware pipeline. You define global rules that apply to every request and route-specific rules matched by method and path. Middleware nodes are executed in order - global first, then route-specific. The real fetch only runs if nothing short-circuits it, which means you can fully mock responses in tests without any network at all.</p>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Route-level control</p>
+      <p class="mt-1 text-xs text-slate-400">Different chaos rules per method and path pattern. A flaky <code>GET /users/:id</code> and a rate-limited <code>POST /orders</code> can coexist in one client.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Drop-in replacement</p>
+      <p class="mt-1 text-xs text-slate-400">Pass the chaos client wherever fetch is expected, or call <code>replaceGlobalFetch()</code> to intercept all requests globally without touching app code.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Extensible registry</p>
+      <p class="mt-1 text-xs text-slate-400">Register custom middleware with <code>registerMiddleware()</code> and use it alongside built-in primitives in any config.</p>
+    </div>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">How to use it in testing</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Create a chaos client in your test file and pass it directly to the code under test instead of the real fetch. No service worker, no network interception setup - just a function that behaves like fetch but follows the rules you define. Each test can use its own client with different chaos settings.</p>
+  <p class="mt-2 text-sm text-slate-500">Note: this pattern works best when your app code accepts an injectable fetch - for example <code>fetchUser(id, { fetch })</code>. If your code calls the global fetch directly, use <code>replaceGlobalFetch(chaosFetch)</code> instead and restore it in <code>afterEach</code>.</p>
+  <pre class="mt-5 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code>import { describe, it, expect } from 'vitest'
+import { createClient } from '@fetchkit/chaos-fetch'
+import { fetchUser } from './api' // your app code that calls fetch
+
+describe('fetchUser resilience', () => {
+  it('retries and succeeds after a transient failure', async () => {
+    const chaosFetch = createClient({
+      routes: {
+        'GET /users/:id': [
+          { failFirstN: { n: 1, status: 503 } }, // first call fails, then passes
+        ],
+      },
+    })
+
+    // pass the chaos client into your app code
+    const user = await fetchUser(123, { fetch: chaosFetch })
+    expect(user.id).toBe(123)
+  })
+
+  it('throws when the circuit is open', async () => {
+    const chaosFetch = createClient({
+      global: [
+        { fail: { status: 500 } }, // every request fails
+      ],
+    })
+
+    await expect(fetchUser(123, { fetch: chaosFetch })).rejects.toThrow()
+  })
+})</code></pre>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">chaos-fetch vs chaos-proxy</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Both tools inject chaos, but at different layers. chaos-fetch operates inside the JavaScript runtime as a fetch wrapper - it is ideal for unit and integration tests where you control the code. chaos-proxy is an external HTTP proxy process - it sits between your app and the network, so it works for any HTTP client in any language and is better suited for end-to-end testing or multi-service scenarios.</p>
+  <div class="mt-6 overflow-x-auto">
+    <table class="w-full text-sm text-left">
+      <thead>
+        <tr class="border-b border-slate-700">
+          <th class="pb-2 pr-6 font-semibold text-slate-300">Capability</th>
+          <th class="pb-2 pr-6 font-semibold text-teal-300">chaos-fetch</th>
+          <th class="pb-2 font-semibold text-teal-300">chaos-proxy</th>
+        </tr>
+      </thead>
+      <tbody class="text-slate-400">
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Works with any HTTP client / language</td>
+          <td class="py-2 pr-6">No - fetch only</td>
+          <td class="py-2">Yes</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Setup required</td>
+          <td class="py-2 pr-6">None - import and use</td>
+          <td class="py-2">Run proxy process + point clients at it</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Use in unit / integration tests</td>
+          <td class="py-2 pr-6">Ideal</td>
+          <td class="py-2">Possible but heavyweight</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Use in end-to-end / multi-service tests</td>
+          <td class="py-2 pr-6">Not applicable</td>
+          <td class="py-2">Ideal</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Route-specific chaos rules</td>
+          <td class="py-2 pr-6">Yes</td>
+          <td class="py-2">Yes</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Hot-reload config</td>
+          <td class="py-2 pr-6">No - create new client</td>
+          <td class="py-2">Yes</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-6">Observability (tracing / metrics)</td>
+          <td class="py-2 pr-6">Optional OTEL middleware</td>
+          <td class="py-2">Built-in</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="mt-10 grid gap-4 md:grid-cols-2">
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h3 class="text-lg font-semibold">Built-in primitives</h3>
+    <ul class="mt-3 space-y-2 text-sm text-slate-300">
+      <li><strong>latency</strong> - fixed delay every request</li>
+      <li><strong>latencyRange</strong> - random delay between min and max</li>
+      <li><strong>fail</strong> - always return a fixed error status</li>
+      <li><strong>failRandomly</strong> - fail at a given probability (0..1)</li>
+      <li><strong>failNth</strong> - fail every Nth request, cyclically</li>
+      <li><strong>failFirstN</strong> - fail the first N requests, then pass</li>
+      <li><strong>rateLimit</strong> - cap requests per time window, return 429</li>
+      <li><strong>throttle</strong> - limit response bandwidth in bytes/sec</li>
+      <li><strong>mock</strong> - return a fixed response without hitting the network</li>
+    </ul>
+  </article>
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h3 class="text-lg font-semibold">Highlights</h3>
+    <ul class="mt-3 space-y-2 text-sm text-slate-300">
+      <li>Global + route-specific middleware chains</li>
+      <li>Koa-style composable middleware model</li>
+      <li>Custom middleware registry</li>
+      <li>Optional global fetch replacement</li>
+    </ul>
+  </article>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-xl font-semibold">From the blog</h2>
+  <ul class="mt-4 space-y-2 text-sm text-slate-300">
+    <li><a class="text-teal-300 hover:underline" target="_blank" rel="noreferrer" href="https://blog.gaborkoos.com/posts/2025-09-27-Introducing-chaos-fetch-network-chaos-injection-for-fetch-requests">Introducing chaos-fetch</a></li>
+    <li><a class="text-teal-300 hover:underline" target="_blank" rel="noreferrer" href="https://blog.gaborkoos.com/posts/2025-10-07-Chaos-Driven-Testing-for-Full-Stack-Apps">Chaos-driven testing for full stack apps</a></li>
+  </ul>
+</section>

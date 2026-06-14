@@ -1,0 +1,139 @@
+---
+layout: layouts/base.njk
+title: ffetch | fetch-kit
+description: TypeScript-first drop-in fetch with retries, timeouts, and optional plugins.
+permalink: /ffetch/
+---
+<section class="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+  <div>
+    <p class="mb-3 inline-flex items-center rounded-full border border-teal-400/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">@fetchkit/ffetch</p>
+    <h1 class="text-4xl font-semibold text-slate-50">Resilient fetch without abandoning native ergonomics</h1>
+    <p class="mt-4 max-w-3xl text-slate-300">ffetch is a TypeScript-first fetch wrapper with production defaults: timeouts, retries with exponential backoff and jitter, structured errors, and optional plugins for advanced resilience behavior.</p>
+    <div class="mt-4 badges">
+      <img src="https://img.shields.io/npm/v/@fetchkit/ffetch" alt="ffetch npm version" />
+      <img src="https://img.shields.io/npm/dm/@fetchkit/ffetch" alt="ffetch npm downloads" />
+      <img src="https://img.shields.io/github/stars/fetch-kit/ffetch?style=social" alt="ffetch github stars" />
+    </div>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a href="https://github.com/fetch-kit/ffetch" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm hover:border-slate-500">GitHub</a>
+      <a href="https://www.npmjs.com/package/@fetchkit/ffetch" target="_blank" rel="noreferrer" class="rounded-md border border-teal-500/50 bg-teal-500/10 px-4 py-2 text-sm text-teal-200">npm package</a>
+      <a href="https://fetch-kit.github.io/ffetch-demo/" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm hover:border-slate-500">Try in chaos arena</a>
+    </div>
+  </div>
+
+  <aside class="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+    <h2 class="text-lg font-semibold">Install</h2>
+    <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>npm install @fetchkit/ffetch</code></pre>
+    <ul class="mt-4 space-y-2 text-sm text-slate-300">
+      <li>~3kb minified core</li>
+      <li>Zero runtime dependencies</li>
+      <li>Built-in error classes</li>
+      <li>Works with any fetch-compatible handler</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">What it does</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Plain <code>fetch</code> gives you a promise. ffetch gives you a client. The difference is everything that has to happen around the request: aborting if the server goes silent, retrying with backoff when it fails transiently, surfacing structured errors instead of raw responses, and optionally deduplicating identical in-flight requests or tripping a circuit breaker when an upstream degrades.</p>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Timeouts &amp; retries</p>
+      <p class="mt-1 text-xs text-slate-400">Every request gets an abort timeout and configurable retry count with exponential backoff and jitter out of the box.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Structured errors</p>
+      <p class="mt-1 text-xs text-slate-400">Network failures, HTTP errors, timeouts, and circuit trips are distinct typed classes - not plain Error objects to parse.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Opt-in plugins</p>
+      <p class="mt-1 text-xs text-slate-400">Dedupe, circuit breaker, bulkhead, hedge, and shortcut plugins are tree-shakeable - import only what you need.</p>
+    </div>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">Examples</h2>
+
+  <h3 class="mt-6 text-base font-semibold text-slate-100">Minimal</h3>
+  <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code>import { createClient } from '@fetchkit/ffetch'
+
+const api = createClient({ timeout: 5_000, retries: 2 })
+
+const response = await api('https://api.example.com/users')
+const users = await response.json()</code></pre>
+
+  <h3 class="mt-8 text-base font-semibold text-slate-100">Production setup</h3>
+  <p class="mt-1 text-sm text-slate-400">Plugins are tree-shakeable and opt-in. Add dedupe to collapse identical in-flight requests, circuit breaker to stop hammering failing upstreams, and the shortcut plugins for a fluent request/response API.</p>
+  <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code>import { createClient } from '@fetchkit/ffetch'
+import { dedupePlugin } from '@fetchkit/ffetch/plugins/dedupe'
+import { circuitPlugin } from '@fetchkit/ffetch/plugins/circuit'
+import { requestShortcutsPlugin } from '@fetchkit/ffetch/plugins/request-shortcuts'
+import { responseShortcutsPlugin } from '@fetchkit/ffetch/plugins/response-shortcuts'
+
+const api = createClient({
+  timeout: 10_000,
+  retries: 2,
+  plugins: [
+    dedupePlugin({ ttl: 30_000, sweepInterval: 5_000 }),
+    circuitPlugin({ threshold: 5, reset: 30_000 }),
+    responseShortcutsPlugin(),
+    requestShortcutsPlugin(),
+  ],
+})
+
+const users = await api
+  .get('https://api.example.com/users')
+  .json()</code></pre>
+
+  <h3 class="mt-8 text-base font-semibold text-slate-100">Error handling</h3>
+  <p class="mt-1 text-sm text-slate-400">ffetch throws distinct typed errors - catch what you can handle, let the rest propagate.</p>
+  <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code>import { createClient, TimeoutError, CircuitOpenError, HttpError, RetryLimitError } from '@fetchkit/ffetch'
+
+try {
+  const data = await api.get('https://api.example.com/users').json()
+} catch (e) {
+  if (e instanceof TimeoutError) {
+    // server went silent - show a retry prompt
+  } else if (e instanceof CircuitOpenError) {
+    // upstream is degraded - fail fast, return cached/fallback data
+  } else if (e instanceof RetryLimitError) {
+    // exhausted retries - log and surface error to user
+  } else if (e instanceof HttpError) {
+    // non-2xx after retries - e.g. 404, 401
+  } else {
+    throw e // unexpected - let it bubble
+  }
+}</code></pre>
+</section>
+
+<section class="mt-10 grid gap-4 md:grid-cols-2">
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h3 class="text-lg font-semibold">Key features</h3>
+    <ul class="mt-3 space-y-2 text-sm text-slate-300">
+      <li>Timeouts and retries with jitter</li>
+      <li>Abort-aware retry cancellation</li>
+      <li>Per-request overrides and hooks</li>
+      <li>Optional plugins: dedupe, circuit breaker, hedge, bulkhead, context-id</li>
+      <li>Optional request/response shortcuts and download progress</li>
+    </ul>
+  </article>
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h3 class="text-lg font-semibold">Docs</h3>
+    <ul class="mt-3 space-y-2 text-sm text-slate-300">
+      <li><a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/ffetch/blob/main/docs/plugins.md">Plugin docs</a></li>
+      <li><a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/ffetch/blob/main/docs/errorhandling.md">Error handling</a></li>
+      <li><a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/ffetch/blob/main/docs/advanced.md">Advanced usage</a></li>
+      <li><a class="text-teal-300 hover:underline" href="https://github.com/fetch-kit/ffetch/blob/main/docs/migration.md">Migration guide</a></li>
+    </ul>
+  </article>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-xl font-semibold">From the blog</h2>
+  <ul class="mt-4 space-y-2 text-sm text-slate-300">
+    <li><a class="text-teal-300 hover:underline" target="_blank" rel="noreferrer" href="https://blog.gaborkoos.com/posts/2026-04-10-ffetch-v5.1.0-Is-Out">ffetch v5.1.0 is out</a></li>
+    <li><a class="text-teal-300 hover:underline" target="_blank" rel="noreferrer" href="https://blog.gaborkoos.com/posts/2026-03-14-ffetch-5.0.0.Is-Out">ffetch v5.0.0 is out</a></li>
+    <li><a class="text-teal-300 hover:underline" target="_blank" rel="noreferrer" href="https://blog.gaborkoos.com/posts/2025-09-13-Making-Your-Fetch-Requests-Production-Ready-With-Ffetch">Making your fetch requests production-ready with ffetch</a></li>
+  </ul>
+</section>

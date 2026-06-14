@@ -1,0 +1,110 @@
+---
+layout: layouts/base.njk
+title: chaos arena | fetch-kit
+description: ffetch-demo for client comparison and resilience diagnosis.
+permalink: /chaos-arena/
+---
+<section class="grid gap-8 lg:grid-cols-[1.35fr_1fr]">
+  <div>
+    <p class="mb-3 inline-flex items-center rounded-full border border-teal-400/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">ffetch-demo</p>
+    <h1 class="text-4xl font-semibold text-slate-50">The fetch client chaos arena</h1>
+    <p class="mt-4 max-w-3xl text-slate-300">A browser-based benchmark that runs fetch, axios, ky, and ffetch side-by-side under identical controlled chaos. No install, no server, no account - opens directly in your browser.</p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a href="https://github.com/fetch-kit/ffetch-demo" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm hover:border-slate-500">GitHub</a>
+      <a href="https://fetch-kit.github.io/ffetch-demo/" target="_blank" rel="noreferrer" class="rounded-md border border-teal-500/50 bg-teal-500/10 px-4 py-2 text-sm text-teal-200">Open live arena</a>
+    </div>
+  </div>
+  <aside class="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+    <h2 class="text-lg font-semibold">What it measures</h2>
+    <ul class="mt-3 space-y-2 text-sm text-slate-300">
+      <li>Reliability score (0-100)</li>
+      <li>Latency p50 / p95 / p99</li>
+      <li>Error rate and outcome breakdown</li>
+      <li>Throughput (req/sec)</li>
+      <li>Retry amplification</li>
+      <li>Peak and average concurrency</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="mt-10 grid gap-4 md:grid-cols-2">
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h2 class="text-xl font-semibold">Use case 1: compare clients</h2>
+    <p class="mt-3 text-sm leading-6 text-slate-300">Run native fetch, axios, ky, and ffetch against the exact same chaos profile and workload. This isolates client-level behavior under identical transport conditions.</p>
+  </article>
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h2 class="text-xl font-semibold">Use case 2: diagnose resilience settings</h2>
+    <p class="mt-3 text-sm leading-6 text-slate-300">Tune timeout, retries, and plugin configuration in a repeatable environment to see how your strategy shifts tail latency, success rate, and error shape.</p>
+  </article>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">What you can do in the arena</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Every setting is live - change it and re-run. The entire arena state encodes into the URL so you can share a specific experiment with a link.</p>
+
+  <h3 class="mt-7 text-base font-semibold text-slate-100">Configure the chaos layer</h3>
+  <p class="mt-2 text-sm leading-6 text-slate-400">The built-in chaos engine (powered by chaos-fetch) intercepts every outbound request before it hits the network. You compose global rules that apply to all clients simultaneously:</p>
+  <ul class="mt-3 space-y-1 text-sm text-slate-400 list-disc list-inside">
+    <li><strong class="text-slate-300">latency</strong> - fixed delay added to every request</li>
+    <li><strong class="text-slate-300">latencyRange</strong> - random delay between a min and max, simulating jitter</li>
+    <li><strong class="text-slate-300">failRandomly</strong> - probabilistic failures at a configurable rate and HTTP status</li>
+    <li><strong class="text-slate-300">failNth</strong> - fail every Nth request in sequence with a configurable status</li>
+    <li><strong class="text-slate-300">fail</strong> - always short-circuit with a fixed response, useful for testing circuit breakers</li>
+    <li><strong class="text-slate-300">rateLimit</strong> - limit requests per time window; when <code>retryAfterMs</code> is set the 429 response includes a <code>Retry-After</code> header that smart clients like ffetch and ky will respect</li>
+    <li><strong class="text-slate-300">throttle</strong> - bandwidth shaping; limit response transfer rate in bytes/sec with configurable chunk size</li>
+  </ul>
+  <p class="mt-3 text-sm text-slate-400">Rules are executed in order and can be stacked. Start from one of eight presets (zero-config, light, api-instability, meltdown-recovery, rate-limited, slow-network, burst-traffic, brownout) or build your own.</p>
+
+  <h3 class="mt-7 text-base font-semibold text-slate-100">Configure each client independently</h3>
+  <p class="mt-2 text-sm leading-6 text-slate-400">Each of the four clients has its own configuration panel. Cards are draggable so you can reorder them visually.</p>
+  <div class="mt-3 grid gap-3 sm:grid-cols-2">
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">fetch (native)</p>
+      <p class="mt-1 text-xs text-slate-400">No config - the browser baseline. No timeout, no retry, no error handling. Shows what you get with zero effort.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">axios</p>
+      <p class="mt-1 text-xs text-slate-400">Configurable timeout. No retry built-in - shows where a popular client sits without a retry layer.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">ky</p>
+      <p class="mt-1 text-xs text-slate-400">Timeout, retry limit, retry methods, retry status codes, Retry-After awareness, backoff base and max. A capable baseline with sensible ergonomics.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">ffetch</p>
+      <p class="mt-1 text-xs text-slate-400">Everything ky has, plus three opt-in plugins you can toggle per run: dedupe (collapse identical in-flight requests), circuit breaker (stop retrying a broken upstream), and hedge (race a backup request to cut tail latency). Plugin execution order is configurable.</p>
+    </div>
+  </div>
+
+  <h3 class="mt-7 text-base font-semibold text-slate-100">Run settings</h3>
+  <p class="mt-2 text-sm text-slate-400">Set the total request count (default 60), concurrency (default 6 simultaneous requests), and target URL. You can point the arena at any CORS-enabled endpoint - use a local dev server or a public API.</p>
+
+  <h3 class="mt-7 text-base font-semibold text-slate-100">What gets measured</h3>
+  <ul class="mt-3 space-y-1 text-sm text-slate-400 list-disc list-inside">
+    <li><strong class="text-slate-300">Reliability score (0-100)</strong> - composite metric: success rate minus penalties for timeouts, thrown exceptions, and p95 tail latency</li>
+    <li><strong class="text-slate-300">Latency p50 / p95 / p99</strong> - median, high-percentile, and tail latency in ms</li>
+    <li><strong class="text-slate-300">Error rate and error distribution</strong> - breakdown by outcome type: 2xx success, deduped-ok, TimeoutError, CircuitOpenError, HTTP 429, HTTP 500/503, other</li>
+    <li><strong class="text-slate-300">Throughput</strong> - requests per second across the full run</li>
+    <li><strong class="text-slate-300">Retry attempts</strong> - total transport calls vs successful outcomes, revealing amplification</li>
+    <li><strong class="text-slate-300">Peak and average in-flight</strong> - concurrency profile per client</li>
+  </ul>
+
+  <h3 class="mt-7 text-base font-semibold text-slate-100">Automated diagnosis</h3>
+  <p class="mt-2 text-sm leading-6 text-slate-400">After each run a diagnostic engine analyzes each client against the chaos conditions and surfaces two things:</p>
+  <ul class="mt-3 space-y-1 text-sm text-slate-400 list-disc list-inside">
+    <li><strong class="text-slate-300">Observations</strong> - detected problems with a confidence score, e.g. "timeout is too tight for observed p95" or "no retry configured but 20% of requests failed"</li>
+    <li><strong class="text-slate-300">Recommended tweaks</strong> - specific actionable suggestions, e.g. "increase timeout to 4500ms" or "enable circuit breaker with threshold 5"</li>
+  </ul>
+  <p class="mt-3 text-sm text-slate-400">The engine includes guard rules that suppress harmful recommendations - for example it won't suggest adding more retries if your timeout is already too tight, and won't suggest a circuit breaker for rate-limit problems. When a recommendation is suppressed the UI shows the reason.</p>
+
+  <h3 class="mt-7 text-base font-semibold text-slate-100">Share and reproduce</h3>
+  <p class="mt-2 text-sm text-slate-400">Every chaos config, client setting, and run parameter is encoded into the URL. Copy the address bar to get a shareable link that reproduces the exact same experiment in anyone's browser.</p>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-xl font-semibold">From the blog</h2>
+  <ul class="mt-4 space-y-2 text-sm text-slate-300">
+    <li><a class="text-teal-300 hover:underline" target="_blank" rel="noreferrer" href="https://blog.gaborkoos.com/posts/2026-04-05-Introducing-ffetch-demo-the-Fetch-Client-Chaos-Arena">Introducing ffetch-demo: the fetch client chaos arena</a></li>
+    <li><a class="text-teal-300 hover:underline" target="_blank" rel="noreferrer" href="https://blog.gaborkoos.com/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You">Your HTTP Client Is Lying to You</a></li>
+  </ul>
+</section>

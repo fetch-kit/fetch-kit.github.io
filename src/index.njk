@@ -1,0 +1,85 @@
+---
+layout: layouts/base.njk
+title: fetch-kit
+description: Making fetch more powerful in production and more testable in development.
+permalink: /
+---
+<section class="mb-10 grid gap-8 lg:grid-cols-[1.35fr_1fr]">
+  <div>
+    <h1 class="max-w-3xl text-4xl font-semibold leading-tight text-slate-50">Making fetch more powerful in production and more testable in development</h1>
+    <p class="mt-5 max-w-2xl text-base leading-7 text-slate-300">fetch-kit is a focused ecosystem for shipping resilient network clients and chaos-testing them before production does it for you.</p>
+    <div class="mt-7 flex flex-wrap gap-3">
+      <a href="https://github.com/fetch-kit" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 hover:border-slate-500">GitHub org</a>
+      <a href="https://fetch-kit.github.io/ffetch-demo" target="_blank" rel="noreferrer" class="rounded-md border border-teal-500/50 bg-teal-500/10 px-4 py-2 text-sm text-teal-200 hover:bg-teal-500/20">Open chaos arena</a>
+    </div>
+    <div class="mt-8 pt-6 border-t border-slate-800">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <h3 class="text-sm font-semibold text-slate-100">fetch is great. Production is not.</h3>
+          <p class="mt-1 text-sm leading-6 text-slate-400">The native <code>fetch</code> API ships without timeouts, retries, backoff, or structured error handling. Every app reinvents these on top of it - inconsistently, incompletely, and untested under failure.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-slate-100">Test what you can't predict.</h3>
+          <p class="mt-1 text-sm leading-6 text-slate-400">Networks fail in ways dev environments never show: latency spikes, partial responses, TCP resets, server overloads. fetch-kit gives you the tooling to simulate these failures before your users find them.</p>
+        </div>
+      </div>
+      <p class="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">Further reading</p>
+      <ul class="mt-2 flex flex-col gap-y-2 text-sm">
+        <li><a class="text-teal-300 hover:underline" href="https://www.freecodecamp.org/news/how-to-go-from-toy-api-calls-to-production-ready-networking-in-javascript/" target="_blank" rel="noreferrer">From toy API calls to production-ready networking</a></li>
+        <li><a class="text-teal-300 hover:underline" href="https://blog.gaborkoos.com/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/" target="_blank" rel="noreferrer">Your HTTP Client Is Lying to You</a></li>
+        <li><a class="text-teal-300 hover:underline" href="https://blog.gaborkoos.com/posts/2025-09-13-Making-Your-Fetch-Requests-Production-Ready-With-Ffetch/" target="_blank" rel="noreferrer">Making Your Fetch Requests Production-Ready with ffetch</a></li>
+        <li><a class="text-teal-300 hover:underline" href="https://blog.gaborkoos.com/posts/2025-10-01-Small-Scale-Chaos-Testing-The-Missing-Step-Before-Production/" target="_blank" rel="noreferrer">Small-Scale Chaos Testing: The Missing Step Before Production</a></li>
+        <li><a class="text-teal-300 hover:underline" href="https://blog.gaborkoos.com/posts/2025-09-21-Breaking-Your-Own-App-on-Purpose-with-Chaos-Proxy/" target="_blank" rel="noreferrer">Breaking Your Own App (on Purpose) with Chaos Proxy</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+    <h2 class="text-lg font-semibold text-slate-100">Latest fetch-kit announcements</h2>
+
+    <div id="news-list" class="mt-4 space-y-3 text-sm text-slate-300">
+      <p class="text-slate-500">Loading announcements...</p>
+    </div>
+  </aside>
+</section>
+
+<section class="mb-10 grid gap-4 sm:grid-cols-2">
+  <a href="/ffetch/" class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 hover:border-teal-500/50">
+    <h3 class="text-lg font-semibold text-slate-100">ffetch</h3>
+    <p class="mt-2 text-sm text-slate-400">TypeScript-first drop-in fetch with timeouts, retries, and optional resilience plugins.</p>
+  </a>
+  <a href="/chaos-fetch/" class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 hover:border-teal-500/50">
+    <h3 class="text-lg font-semibold text-slate-100">chaos-fetch</h3>
+    <p class="mt-2 text-sm text-slate-400">Composable fetch middleware for injecting latency, failures, throttling, and route-specific chaos.</p>
+  </a>
+  <a href="/chaos-proxy/" class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 hover:border-teal-500/50">
+    <h3 class="text-lg font-semibold text-slate-100">chaos-proxy</h3>
+    <p class="mt-2 text-sm text-slate-400">Network chaos proxy with shared config model across Node.js and Go runtimes.</p>
+  </a>
+  <a href="/chaos-arena/" class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 hover:border-teal-500/50">
+    <h3 class="text-lg font-semibold text-slate-100">chaos arena</h3>
+    <p class="mt-2 text-sm text-slate-400">Hands-on benchmark and diagnosis sandbox powered by ffetch-demo.</p>
+  </a>
+</section>
+
+<section class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold text-slate-100">When to use what</h2>
+  <div class="mt-5 grid gap-4 md:grid-cols-3">
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <h3 class="font-medium text-slate-100">Build resilient clients</h3>
+      <p class="mt-2 text-sm text-slate-400">Use <strong>ffetch</strong> when you need production-safe fetch behavior in app code.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <h3 class="font-medium text-slate-100">Inject chaos in tests</h3>
+      <p class="mt-2 text-sm text-slate-400">Use <strong>chaos-fetch</strong> when you want fetch-level fault injection in browser or test runtime.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <h3 class="font-medium text-slate-100">Chaos at the network edge</h3>
+      <p class="mt-2 text-sm text-slate-400">Use <strong>chaos-proxy</strong> when you need transport-level simulation for any HTTP consumer.</p>
+    </div>
+  </div>
+</section>
+
+{% block scripts %}
+<script type="module" src="/assets/js/news.js"></script>
+{% endblock %}
