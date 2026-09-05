@@ -52,6 +52,10 @@ permalink: /
     <h3 class="text-lg font-semibold text-slate-100">chaos-fetch</h3>
     <p class="mt-2 text-sm text-slate-400">Composable fetch middleware for injecting latency, failures, throttling, and route-specific chaos.</p>
   </a>
+  <a href="/chaos-sw/" class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 hover:border-teal-500/50">
+    <h3 class="text-lg font-semibold text-slate-100">chaos-sw</h3>
+    <p class="mt-2 text-sm text-slate-400">Service Worker chaos for every request and controlled tab, without replacing application fetch calls.</p>
+  </a>
   <a href="/chaos-proxy/" class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 hover:border-teal-500/50">
     <h3 class="text-lg font-semibold text-slate-100">chaos-proxy</h3>
     <p class="mt-2 text-sm text-slate-400">Network chaos proxy with shared config model across Node.js and Go runtimes.</p>
@@ -64,14 +68,18 @@ permalink: /
 
 <section class="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
   <h2 class="text-2xl font-semibold text-slate-100">When to use what</h2>
-  <div class="mt-5 grid gap-4 md:grid-cols-3">
+  <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
       <h3 class="font-medium text-slate-100">Build resilient clients</h3>
       <p class="mt-2 text-sm text-slate-400">Use <strong>ffetch</strong> when you need production-safe fetch behavior in app code.</p>
     </div>
     <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <h3 class="font-medium text-slate-100">Inject chaos in tests</h3>
-      <p class="mt-2 text-sm text-slate-400">Use <strong>chaos-fetch</strong> when you want fetch-level fault injection in browser or test runtime.</p>
+      <h3 class="font-medium text-slate-100">Inject chaos in code</h3>
+      <p class="mt-2 text-sm text-slate-400">Use <strong>chaos-fetch</strong> for direct, per-client fault injection in browser or test runtimes.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <h3 class="font-medium text-slate-100">Test the whole browser app</h3>
+      <p class="mt-2 text-sm text-slate-400">Use <strong>chaos-sw</strong> to intercept requests across every controlled tab without replacing application fetch calls.</p>
     </div>
     <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
       <h3 class="font-medium text-slate-100">Chaos at the network edge</h3>

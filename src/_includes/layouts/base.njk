@@ -5,20 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title | default('fetch-kit') }}</title>
   <meta name="description" content="{{ description | default('Making fetch more powerful in production and more testable in development.') }}" />
-  <link rel="canonical" href="https://fetch-kit.github.io{{ page.url }}" />
+  <link rel="canonical" href="https://fetchkit.org{{ page.url }}" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="fetch-kit" />
   <meta property="og:title" content="{{ title | default('fetch-kit') }}" />
   <meta property="og:description" content="{{ description | default('Making fetch more powerful in production and more testable in development.') }}" />
-  <meta property="og:url" content="https://fetch-kit.github.io{{ page.url }}" />
-  <meta property="og:image" content="https://fetch-kit.github.io/assets/images/logo.png" />
+  <meta property="og:url" content="https://fetchkit.org{{ page.url }}" />
+  <meta property="og:image" content="https://fetchkit.org/assets/images/logo.png" />
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="{{ title | default('fetch-kit') }}" />
   <meta name="twitter:description" content="{{ description | default('Making fetch more powerful in production and more testable in development.') }}" />
-  <meta name="twitter:image" content="https://fetch-kit.github.io/assets/images/logo.png" />
+  <meta name="twitter:image" content="https://fetchkit.org/assets/images/logo.png" />
   <link rel="icon" href="/assets/images/favicon.ico" />
   <link rel="stylesheet" href="/assets/css/styles.css" />
   {% block head %}{% endblock %}
@@ -43,6 +43,7 @@
         <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/">home</a>
         <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/ffetch/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/ffetch/">ffetch</a>
         <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/chaos-fetch/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/chaos-fetch/">chaos-fetch</a>
+        <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/chaos-sw/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/chaos-sw/">chaos-sw</a>
         <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/chaos-proxy/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/chaos-proxy/">chaos-proxy</a>
         <a class="rounded-md px-2 py-1 hover:text-white {% if page.url == '/chaos-arena/' %}bg-[color:var(--color-panel)] text-white{% else %}text-slate-300{% endif %}" href="/chaos-arena/">chaos arena</a>
       </div>

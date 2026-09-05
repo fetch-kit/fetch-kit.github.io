@@ -1,0 +1,178 @@
+---
+layout: layouts/base.njk
+title: chaos-sw | fetch-kit
+description: Inject configurable network chaos across browser requests with a Service Worker.
+permalink: /chaos-sw/
+---
+<section class="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+  <div>
+    <p class="mb-3 inline-flex items-center rounded-full border border-teal-400/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">@fetchkit/chaos-sw</p>
+    <h1 class="text-4xl font-semibold text-slate-50">Network chaos across your browser app</h1>
+    <p class="mt-4 max-w-3xl text-slate-300">chaos-sw installs a Service Worker that injects failures, latency, rate limits, throttling, and mock responses into browser requests. Existing fetch calls and HTTP clients stay unchanged, while one configuration applies across every tab controlled by the worker.</p>
+    <div class="mt-4 badges">
+      <img src="https://img.shields.io/npm/v/@fetchkit/chaos-sw" alt="chaos-sw npm version" />
+      <img src="https://img.shields.io/npm/dm/@fetchkit/chaos-sw" alt="chaos-sw npm downloads" />
+      <img src="https://img.shields.io/github/stars/fetch-kit/chaos-sw?style=social" alt="chaos-sw github stars" />
+    </div>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a href="https://github.com/fetch-kit/chaos-sw" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm hover:border-slate-500">GitHub</a>
+      <a href="https://www.npmjs.com/package/@fetchkit/chaos-sw" target="_blank" rel="noreferrer" class="rounded-md border border-teal-500/50 bg-teal-500/10 px-4 py-2 text-sm text-teal-200">npm package</a>
+      <a href="https://github.com/fetch-kit/chaos-sw/tree/main/docs" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm hover:border-slate-500">Documentation</a>
+    </div>
+  </div>
+
+  <aside class="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+    <h2 class="text-lg font-semibold">Install</h2>
+    <pre class="mt-3 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>npm install @fetchkit/chaos-sw
+npx chaos-sw init public</code></pre>
+    <p class="mt-4 text-sm text-slate-300">Serve <code>chaos-sw.js</code> from the application root to let the worker control the entire origin.</p>
+  </aside>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">What it does</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">chaos-sw uses <a class="text-teal-300 hover:underline" href="/chaos-fetch/">chaos-fetch</a> as its chaos engine, but moves interception into the browser Service Worker. Global and route-specific middleware can affect requests made by application code, third-party HTTP clients, and every controlled tab without replacing the global fetch function.</p>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Transparent interception</p>
+      <p class="mt-1 text-xs text-slate-400">Keep existing fetch calls and HTTP clients. The Service Worker applies chaos before requests reach the network.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Shared across tabs</p>
+      <p class="mt-1 text-xs text-slate-400">One worker registration shares its enabled state, configuration, and scenario counters across all controlled tabs.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Same chaos model</p>
+      <p class="mt-1 text-xs text-slate-400">Use the latency, failure, rate-limit, throttle, mock, and route configuration supported by chaos-fetch.</p>
+    </div>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">Quick start</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Register the copied worker, apply a serializable chaos-fetch configuration, and enable it. Path routes can match every origin; absolute URL routes restrict a rule to one exact origin.</p>
+  <pre class="mt-5 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 text-sm text-slate-200"><code>import { setupChaosWorker } from '@fetchkit/chaos-sw'
+
+const chaos = setupChaosWorker({
+  workerUrl: '/chaos-sw.js',
+  scope: '/',
+})
+
+await chaos.start()
+await chaos.applyConfig({
+  global: [
+    { latencyRange: { minMs: 100, maxMs: 500 } },
+  ],
+  routes: {
+    'GET /api/users/:id': [
+      { failNth: { n: 3, status: 503 } },
+    ],
+    'POST https://api.example.com/orders': [
+      { failRandomly: { rate: 0.2, status: 500 } },
+    ],
+  },
+})
+await chaos.enable()</code></pre>
+  <div class="mt-5 grid gap-4 sm:grid-cols-3">
+    <div>
+      <h3 class="text-sm font-semibold text-slate-100">Pause chaos</h3>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>await chaos.disable()</code></pre>
+    </div>
+    <div>
+      <h3 class="text-sm font-semibold text-slate-100">Reset counters</h3>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>await chaos.resetScenario()</code></pre>
+    </div>
+    <div>
+      <h3 class="text-sm font-semibold text-slate-100">Inspect state</h3>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200"><code>await chaos.getState()</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">Which chaos tool should you use?</h2>
+  <div class="mt-6 overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-700">
+          <th class="pb-2 pr-6 font-semibold text-slate-300">Tool</th>
+          <th class="pb-2 pr-6 font-semibold text-slate-300">Interception layer</th>
+          <th class="pb-2 font-semibold text-slate-300">Best fit</th>
+        </tr>
+      </thead>
+      <tbody class="text-slate-400">
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6 text-teal-300">chaos-fetch</td>
+          <td class="py-2 pr-6">A fetch-compatible client inside JavaScript</td>
+          <td class="py-2">Unit and integration tests with per-client configuration</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6 text-teal-300">chaos-sw</td>
+          <td class="py-2 pr-6">The browser Service Worker</td>
+          <td class="py-2">Whole-app browser testing without replacing application fetch calls</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-6 text-teal-300">chaos-proxy</td>
+          <td class="py-2 pr-6">An external HTTP proxy</td>
+          <td class="py-2">Transport-level and multi-service testing with any HTTP client or language</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold">chaos-sw vs MSW</h2>
+  <p class="mt-3 text-sm leading-6 text-slate-400">Both chaos-sw and Mock Service Worker intercept browser requests through a Service Worker, but they solve different problems. chaos-sw models degraded network conditions around traffic that usually continues to a real or separately mocked backend. MSW primarily defines API behavior and deterministic test data.</p>
+  <div class="mt-6 overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-700">
+          <th class="pb-2 pr-6 font-semibold text-slate-300">Capability</th>
+          <th class="pb-2 pr-6 font-semibold text-teal-300">chaos-sw</th>
+          <th class="pb-2 font-semibold text-teal-300">MSW</th>
+        </tr>
+      </thead>
+      <tbody class="text-slate-400">
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Primary purpose</td>
+          <td class="py-2 pr-6">Fault injection and degraded conditions</td>
+          <td class="py-2">API behavior and data mocking</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Configuration</td>
+          <td class="py-2 pr-6">Serializable global and route middleware</td>
+          <td class="py-2">JavaScript or TypeScript request handlers</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Random and stateful failures</td>
+          <td class="py-2 pr-6">Built in</td>
+          <td class="py-2">Implemented in handler logic</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6">Bandwidth throttling</td>
+          <td class="py-2 pr-6">Built in</td>
+          <td class="py-2">Not its primary abstraction</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-6">Response mocking</td>
+          <td class="py-2 pr-6">Basic status and body mocks</td>
+          <td class="py-2">Rich request-aware resolvers</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="mt-10 grid gap-4 md:grid-cols-2">
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h2 class="text-xl font-semibold">Existing Service Workers</h2>
+    <p class="mt-3 text-sm leading-6 text-slate-400">Only one Service Worker registration controls a page at a scope. If your application already has a PWA, Workbox, MSW, or custom worker, import <code>createChaosWorkerRuntime</code> from <code>@fetchkit/chaos-sw/worker</code> and register its event handlers inside that worker.</p>
+    <a class="mt-4 inline-block text-sm text-teal-300 hover:underline" href="https://github.com/fetch-kit/chaos-sw/blob/main/docs/integration.md">Integration guide</a>
+  </article>
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h2 class="text-xl font-semibold">State and limitations</h2>
+    <p class="mt-3 text-sm leading-6 text-slate-400">Configuration and middleware counters live in Service Worker memory and are shared across controlled tabs. Browsers may restart workers, so callers must reapply desired state. The core package deliberately has no persistence, YAML editor, DevTools extension, or request log.</p>
+    <a class="mt-4 inline-block text-sm text-teal-300 hover:underline" href="https://github.com/fetch-kit/chaos-sw/blob/main/docs/testing-and-limitations.md">Testing and limitations</a>
+  </article>
+</section>
