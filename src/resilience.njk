@@ -1,0 +1,98 @@
+---
+layout: layouts/base.njk
+title: http-resilience | fetch-kit
+description: Published correctness matrix for 11 fetch resilience libraries across 21 failure scenarios, with failure traces.
+permalink: /resilience/
+---
+<section class="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+  <div>
+    <p class="mb-3 inline-flex items-center rounded-full border border-teal-400/25 bg-teal-500/10 px-3 py-1 text-xs font-medium text-teal-200">fetch-kit/http-resilience</p>
+    <h1 class="text-4xl font-semibold text-slate-50">Which fetch clients actually survive failure</h1>
+    <p class="mt-4 max-w-3xl text-slate-300">11 pinned fetch resilience libraries run against 21 failure scenarios: retries, backoff aborts, hedges, circuit breakers, bulkheads, deduplication, cancellation, real timeouts, and body replay. Every cell is an executed assertion against that library's own terminal error contract, and every failure links to a recorded trace.</p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a href="https://fetchkit.org/http-resilience/" class="rounded-md border border-teal-500/50 bg-teal-500/10 px-4 py-2 text-sm text-teal-200 hover:bg-teal-500/20">Open the full matrix</a>
+      <a href="https://fetchkit.org/http-resilience/matrix.json" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 hover:border-slate-500">Matrix JSON</a>
+      <a href="https://github.com/fetch-kit/http-resilience" target="_blank" rel="noreferrer" class="rounded-md border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 hover:border-slate-500">GitHub</a>
+    </div>
+  </div>
+
+  <aside class="rounded-xl border border-slate-800 bg-slate-900/70 p-6">
+    <h2 class="text-lg font-semibold text-slate-100">Latest published run</h2>
+    <div id="resilience-stats" class="mt-4 grid gap-3 sm:grid-cols-2">
+      <p class="text-sm text-slate-500">Loading the latest matrix...</p>
+    </div>
+    <p id="resilience-meta" class="mt-4 text-xs text-slate-500">Regenerated weekly and whenever the pinned dependencies change.</p>
+    <details class="mt-4 text-xs text-slate-400">
+      <summary class="cursor-pointer text-slate-300">Pinned versions measured</summary>
+      <p id="resilience-versions" class="mt-2 leading-5"></p>
+    </details>
+  </aside>
+</section>
+
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+  <h2 class="text-2xl font-semibold text-slate-100">How a cell is produced</h2>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Pinned, recorded versions</p>
+      <p class="mt-1 text-xs text-slate-400">Each library is pinned and the version actually measured is recorded per run, so every cell traces back to the exact release it was asserted against.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Executed assertions</p>
+      <p class="mt-1 text-xs text-slate-400">PASS and FAIL come from assertions run against real traffic, attempt and logical accounting, and each library's terminal error contract - not from release notes or documentation claims.</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+      <p class="text-sm font-semibold text-slate-100">Failure traces</p>
+      <p class="mt-1 text-xs text-slate-400">Every failing cell links to the configuration it ran with, the behaviour it promised, the assertion that broke, and a trace of the failing run.</p>
+    </div>
+  </div>
+  <div class="mt-6 overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="border-b border-slate-700">
+          <th class="pb-2 pr-6 font-semibold text-slate-300">Status</th>
+          <th class="pb-2 font-semibold text-slate-300">Meaning</th>
+        </tr>
+      </thead>
+      <tbody class="text-slate-400">
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6 font-semibold text-emerald-300">PASS</td>
+          <td class="py-2">Observed behaviour matched the asserted contract for that scenario.</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6 font-semibold text-rose-300">FAIL</td>
+          <td class="py-2">Observed behaviour broke the contract. These are findings, not a broken publication.</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6 font-semibold text-slate-300">N/A</td>
+          <td class="py-2">The combination is genuinely unavailable; the cell states the reason.</td>
+        </tr>
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-6 font-semibold text-amber-300">NOT TESTED</td>
+          <td class="py-2">No implementation of that scenario for that library yet.</td>
+        </tr>
+        <tr>
+          <td class="py-2 pr-6 font-semibold text-amber-300">NOT RUN</td>
+          <td class="py-2">A registered case was absent from the run. A published matrix never contains this state.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="mt-10 grid gap-4 md:grid-cols-2">
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h2 class="text-xl font-semibold text-slate-100">Failing cells are the deliverable</h2>
+    <p class="mt-3 text-sm leading-6 text-slate-400">Most libraries pass the straightforward retry cases and diverge exactly where they make no explicit promise: interrupting a backoff, removing a queued waiter, or reporting attempt and logical accounting at a circuit boundary. The matrix keeps those disagreements visible instead of averaging them away.</p>
+    <a class="mt-4 inline-block text-sm text-teal-300 hover:underline" href="https://github.com/fetch-kit/http-resilience#readme">Read the methodology</a>
+  </article>
+  <article class="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <h2 class="text-xl font-semibold text-slate-100">Reproduce any cell locally</h2>
+    <p class="mt-3 text-sm leading-6 text-slate-400">The matrix is generated from the same suite you can run: <code>npm ci</code>, then <code>npm run report</code>. Naming a library runs only its scenarios, and the command exits nonzero on purpose - failing assertions still produce the report.</p>
+    <a class="mt-4 inline-block text-sm text-teal-300 hover:underline" href="https://github.com/fetch-kit/http-resilience#implemented-scenarios">Scenario list</a>
+  </article>
+</section>
+
+{% block scripts %}
+<script type="module" src="/assets/js/resilience.js"></script>
+{% endblock %}
+
