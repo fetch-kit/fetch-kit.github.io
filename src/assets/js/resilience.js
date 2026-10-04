@@ -1,63 +1,35 @@
 const matrixUrl = '/http-resilience/matrix.json';
-const stats = document.getElementById('resilience-stats');
+const date = document.getElementById('resilience-date');
+const libraries = document.getElementById('resilience-libraries');
+const scenarios = document.getElementById('resilience-scenarios');
 const meta = document.getElementById('resilience-meta');
 const versions = document.getElementById('resilience-versions');
 
-const tiles = [
-  { label: 'PASS', className: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200' },
-  { label: 'FAIL', className: 'border-rose-500/40 bg-rose-500/10 text-rose-200' },
-  { label: 'N/A', className: 'border-slate-700 bg-slate-900 text-slate-300' },
-];
-
-function renderMessage(message) {
-  if (stats) {
-    stats.innerHTML = `<p class="text-sm text-slate-500">${message}</p>`;
-  }
-  if (meta) {
-    meta.textContent = 'The published matrix could not be loaded; open it directly instead.';
-  }
+function setText(node, value) {
+  if (node) node.textContent = value;
 }
 
 function formatDate(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? '' : parsed.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function renderUnavailable() {
+  setText(date, '-');
+  setText(libraries, '-');
+  setText(scenarios, '-');
+  setText(meta, 'The published matrix could not be loaded right now.');
 }
 
 function render(matrix) {
-  const counts = matrix.counts || {};
-  const libraries = Object.keys(matrix.versions || {}).length;
-  const scenarios = Array.isArray(matrix.rows) ? matrix.rows.length : 0;
-  const values = [counts.pass, counts.fail, counts['not-applicable']].map((value) => value ?? 0);
+  const pinned = Object.entries(matrix.versions || {});
+  const scenarioCount = Array.isArray(matrix.rows) ? matrix.rows.length : 0;
 
-  if (stats) {
-    stats.innerHTML = tiles
-      .map((tile, index) => `
-        <div class="rounded-lg border p-3 ${tile.className}">
-          <p class="text-2xl font-semibold">${values[index]}</p>
-          <p class="text-xs uppercase tracking-wide">${tile.label}</p>
-        </div>
-      `)
-      .concat(`
-        <div class="rounded-lg border border-slate-700 bg-slate-900 p-3 text-slate-300">
-          <p class="text-2xl font-semibold">${libraries} x ${scenarios}</p>
-          <p class="text-xs uppercase tracking-wide">libraries x scenarios</p>
-        </div>
-      `)
-      .join('');
-  }
-
-  if (meta) {
-    const generated = formatDate(matrix.generatedAt);
-    meta.textContent = [generated ? `Latest run ${generated}` : '', matrix.runtime ? `Node ${matrix.runtime}` : '', `${libraries} libraries pinned`]
-      .filter(Boolean)
-      .join(' · ');
-  }
-
-  if (versions) {
-    versions.textContent = Object.entries(matrix.versions || {})
-      .map(([name, version]) => `${name} ${version}`)
-      .join(' · ');
-  }
+  setText(date, formatDate(matrix.generatedAt) || '-');
+  setText(libraries, String(pinned.length));
+  setText(scenarios, String(scenarioCount));
+  setText(meta, [matrix.runtime ? `Node ${matrix.runtime}` : '', 'regenerated weekly'].filter(Boolean).join(' · '));
+  setText(versions, pinned.map(([name, version]) => `${name} ${version}`).join(' · '));
 }
 
 async function loadMatrix() {
@@ -72,7 +44,7 @@ async function loadMatrix() {
     }
     render(matrix);
   } catch (err) {
-    renderMessage('Could not load the latest published matrix right now.');
+    renderUnavailable();
   }
 }
 
